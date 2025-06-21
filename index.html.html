@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emisní kalkulačka domácnosti</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Emisní kalkulačka domácnosti</h1>
+  <form id="calcForm">
+    <table>
+      <tr><th colspan="2">Vstupní hodnoty</th></tr>
+      <tr>
+        <td>Cena emisní povolenky (€/t CO₂):</td>
+        <td><input type="number" id="cena" value="90" step="0.01"></td>
+      </tr>
+      <tr>
+        <td>Spotřeba plynu (MWh/rok):</td>
+        <td><input type="number" id="plyn" value="0" step="0.1"></td>
+      </tr>
+      <tr>
+        <td>Spotřeba hnědého uhlí (t/rok):</td>
+        <td><input type="number" id="uhli" value="0" step="0.1"></td>
+      </tr>
+      <tr><th colspan="2">Auta na benzín</th></tr>
+      <tr>
+        <td>Počet:</td>
+        <td><input type="number" id="autaBenzin" value="0"></td>
+      </tr>
+      <tr>
+        <td>Roční nájezd (km/auto):</td>
+        <td><input type="number" id="najedBenzin" value="0"></td>
+      </tr>
+      <tr><th colspan="2">Auta na naftu</th></tr>
+      <tr>
+        <td>Počet:</td>
+        <td><input type="number" id="autaNafta" value="0"></td>
+      </tr>
+      <tr>
+        <td>Roční nájezd (km/auto):</td>
+        <td><input type="number" id="najedNafta" value="0"></td>
+      </tr>
+      <tr>
+        <td colspan="2" style="text-align: center;">
+          <button type="button" onclick="vypocet()">Spočítat</button>
+        </td>
+      </tr>
+    </table>
+  </form>
+
+  <div id="vystupBox" style="display:none;">
+    <h2>Výsledky:</h2>
+    <table>
+      <tr><th>Typ</th><th>Emise (t CO₂/rok)</th><th>Náklady (€/rok)</th><th>Náklady (Kč/rok)</th></tr>
+      <tr><td>Plyn</td><td id="ePlyn"></td><td id="cPlyn"></td><td id="kPlyn"></td></tr>
+      <tr><td>Uhlí</td><td id="eUhli"></td><td id="cUhli"></td><td id="kUhli"></td></tr>
+      <tr><td>Benzín</td><td id="eBenzin"></td><td id="cBenzin"></td><td id="kBenzin"></td></tr>
+      <tr><td>Nafta</td><td id="eNafta"></td><td id="cNafta"></td><td id="kNafta"></td></tr>
+      <tr><th>Celkem</th><th id="eCelkem"></th><th id="cCelkem"></th><th id="kCelkem"></th></tr>
+    </table>
+  </div>
+
+  <script>
+    function vypocet() {
+      const cena = parseFloat(document.getElementById('cena').value);
+      const kurz = 25; // Kč za 1 EUR
+
+      const plyn = parseFloat(document.getElementById('plyn').value);
+      const uhli = parseFloat(document.getElementById('uhli').value);
+      const autaBenzin = parseInt(document.getElementById('autaBenzin').value);
+      const najedBenzin = parseFloat(document.getElementById('najedBenzin').value);
+      const autaNafta = parseInt(document.getElementById('autaNafta').value);
+      const najedNafta = parseFloat(document.getElementById('najedNafta').value);
+
+      const emisPlyn = plyn * 0.202;
+      const emisUhli = uhli * 1.10;
+      const emisBenzin = autaBenzin * najedBenzin * 0.000192;
+      const emisNafta = autaNafta * najedNafta * 0.000230;
+
+      const cenaPlyn = emisPlyn * cena;
+      const cenaUhli = emisUhli * cena;
+      const cenaBenzin = emisBenzin * cena;
+      const cenaNafta = emisNafta * cena;
+
+      const korunyPlyn = cenaPlyn * kurz;
+      const korunyUhli = cenaUhli * kurz;
+      const korunyBenzin = cenaBenzin * kurz;
+      const korunyNafta = cenaNafta * kurz;
+
+      const celkemEmis = emisPlyn + emisUhli + emisBenzin + emisNafta;
+      const celkovaCena = cenaPlyn + cenaUhli + cenaBenzin + cenaNafta;
+      const celkoveKoruny = korunyPlyn + korunyUhli + korunyBenzin + korunyNafta;
+
+      document.getElementById('ePlyn').textContent = emisPlyn.toFixed(2);
+      document.getElementById('eUhli').textContent = emisUhli.toFixed(2);
+      document.getElementById('eBenzin').textContent = emisBenzin.toFixed(2);
+      document.getElementById('eNafta').textContent = emisNafta.toFixed(2);
+      document.getElementById('eCelkem').textContent = celkemEmis.toFixed(2);
+
+      document.getElementById('cPlyn').textContent = cenaPlyn.toFixed(2);
+      document.getElementById('cUhli').textContent = cenaUhli.toFixed(2);
+      document.getElementById('cBenzin').textContent = cenaBenzin.toFixed(2);
+      document.getElementById('cNafta').textContent = cenaNafta.toFixed(2);
+      document.getElementById('cCelkem').textContent = celkovaCena.toFixed(2);
+
+      document.getElementById('kPlyn').textContent = korunyPlyn.toFixed(0);
+      document.getElementById('kUhli').textContent = korunyUhli.toFixed(0);
+      document.getElementById('kBenzin').textContent = korunyBenzin.toFixed(0);
+      document.getElementById('kNafta').textContent = korunyNafta.toFixed(0);
+      document.getElementById('kCelkem').textContent = celkoveKoruny.toFixed(0);
+
+      document.getElementById('vystupBox').style.display = 'block';
+    }
+  </script>
+</body>
+</html>
